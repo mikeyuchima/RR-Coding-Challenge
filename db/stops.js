@@ -59,10 +59,10 @@ const JSONStops = [{
         "y": 10
     }
 ]
-
-const Stops = JSONStops.reduce((obj, current) => {
-    obj[current.name] = current
-    return obj
+let result = {};
+JSONStops.forEach((el) => {
+    result[el.name] = el;
 })
+let Stops = result
 
 export default Stops

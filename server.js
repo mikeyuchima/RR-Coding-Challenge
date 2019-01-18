@@ -5,12 +5,29 @@ import Legs from './db/legs'
 import bodyParser from 'body-parser';
 
 const app = express()
-const PORT = 3000;
+const WebSocket = require('ws');
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-    extended: false
-}));
+const PORT = 8080;
+
+// Create a new express server
+const server = express()
+    // Make the express server serve static assets (html, javascript, css) from the /public folder
+    .use(express.static('public'))
+    .listen(PORT, () => console.log(`Listening on ${ PORT }`));
+
+// Create the WebSockets server
+const wss = new WebSocket.Server({
+    server,
+    path: "/websocket"
+});
+
+wss.broadcast = (data, ws) => {
+    wss.clients.forEach(client => {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+            client.send(data);
+        }
+    });
+};
 
 const updateLocation = (x_axis, y_axis) => {
     DriverLocation.x_location = x_axis
@@ -51,39 +68,41 @@ const getLocation = () => {
     return (DriverLocation.x_location, DriverLocation.y_location)
 }
 
-getLocation()
+wss.on('connection', (ws) => {
+    console.log('Cline Connected')
+    ws.on('message', data => {
+            console.log("Message Received", data);
+            const msg = JSON.parse(data);
+            let payload;
 
-// get all legs 
-app.get('/api/v1/legs', function (req, res) {
-    res.status(200).send({
-        success: 'true',
-        message: 'list of legs retrieved successfully',
-        legs: Legs
-    })
-})
-
-// get all stops
-app.get('/api/v1/stops', function (req, res) {
-    res.status(200).send({
-        success: 'true',
-        message: 'list of stops retrieved successfully',
-        stops: Stops
-    })
-})
-
-// get driver's location
-app.get('/api/v1/driver', function (req, res) {
-    res.status(200).send({
-        success: 'true',
-        message: 'driver location retrieved successfully',
-        driver_location: getLocation()
-    })
-})
-
-app.put('/api/v1/driver', function (req, res) {
-    res.send('hello world')
-})
-
-app.listen(PORT, () => {
-    console.log(`Rose Rocket listening on port ${PORT}!`);
+            switch (msg.type) {
+                case "RequestDriver":
+                    wss.broadcast(JSON.stringify(getLocation()));
+                    break;
+                case "RequestStops":
+                    payload = {
+                        type: 'IncomingStops',
+                        data: Stops
+                    }
+                    wss.broadcast(JSON.stringify(payload));
+                    break;
+                case 'RequestLegs':
+                    payload = {
+                        type: 'IncomingLegs',
+                        data: Legs
+                    }
+                    wss.broadcast(JSON.stringify(payload));
+                    break;
+                default:
+                    throw new Error("Unknown event type " + msg.type);
+            }
+        }),
+        // Set up a callback for when a client closes the socket. This usually means they closed their browser.
+        ws.on('close', (ws) => {
+            console.log('Client disconnected')
+        });
 });
+
+// app.listen(PORT, () => {
+//     console.log(`Rose Rocket listening on port ${PORT}!`);
+// });
