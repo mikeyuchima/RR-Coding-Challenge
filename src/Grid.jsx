@@ -8,7 +8,9 @@ const Grid = props => {
       icon = stop;
       console.log("ICON", icon);
     } else if (driver_location.x === x && driver_location.y === y) {
-      icon = <i class="fas fa-shuttle-van" alt="vehicle" />;
+      // icon = <i class="fas fa-shuttle-van" alt="vehicle" />;
+      icon = "*";
+      console.log("CAR", x, y);
     }
   }
   return <div className="box">{icon}</div>;

@@ -16,7 +16,7 @@ class Grids extends Component {
             x={x}
             y={y}
             stops={this.props.stops}
-            driver_location={this.state.driver_location}
+            driver_location={this.props.driver_location}
           />
         );
       }

@@ -9,8 +9,8 @@ class App extends Component {
     this.state = {
       legs: {},
       stops: {},
-      completed_legs: [],
-      driver_location: ""
+      completed_legs: {},
+      driver: {}
     };
   }
 
@@ -22,8 +22,10 @@ class App extends Component {
     // Handle when the socket opens (i.e. is connected to the server)
     this.socket.addEventListener("open", evt => {
       console.log("Connected to websocket server");
-      const payload = { type: "RequestStops" };
-      this.socket.send(JSON.stringify(payload));
+      const request_stops = { type: "RequestStops" };
+      this.socket.send(JSON.stringify(request_stops));
+      const request_driver = { type: "RequestDriver" };
+      this.socket.send(JSON.stringify(request_driver));
     });
 
     // Handle messages using `this.receiveMessage`
@@ -38,11 +40,19 @@ class App extends Component {
           this.setState({ legs });
           break;
         case "IncomingStops":
-          console.log(pkg.data);
           const stops = pkg.data;
+          console.log(pkg.data);
           this.setState({ stops });
           break;
-        case "IncomingDriverLocation":
+        case "IncomingDriver":
+          const driver = pkg.data;
+          console.log("got driver");
+          this.setState({ driver });
+          break;
+        case "IncomingCompletedLegs":
+          const completed_legs = pkg.data;
+          console.log("got completed legs");
+          this.setState({ completed_legs });
           break;
         default:
           throw new Error("Unknown event type " + pkg.type);
@@ -52,12 +62,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        {
-          <Grids
-            stops={this.state.stops}
-            driver_location={this.state.driver_location}
-          />
-        }
+        {<Grids stops={this.state.stops} driver_location={this.state.driver} />}
       </div>
     );
   }

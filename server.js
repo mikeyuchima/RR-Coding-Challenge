@@ -34,18 +34,48 @@ const updateLocation = (x_axis, y_axis) => {
     DriverLocation.y_location = y_axis
 }
 
+const autoUpdate = () => {
+    const distance = getDistance() * 1000
+    const current_leg = DriverLocation.activeLegID
+    let progress = ((DriverLocation.progress / 100) * distance)
+    let distance_remaining = progress - distance
+    const speed = Legs[current_leg].speedLimit
+    const time = distance / speed
+    const distance_per_minute = (speed * 10000) / 60
+
+    setInterval(() => {
+        progress = distance_remaining + distance_per_minute
+        percentage = progress / distance
+    }, 60000);
+}
+
+const getFinishedLegs = () => {
+    const last_stop = DriverLocation.activeLegID.split('')[0]
+    const letter_number = last_stop.toLowerCase().charCodeAt(0) - 97
+    let completed_stops = {}
+    console.log(letter_number)
+    for (let i = 0; i < letter_number; i++) {
+        completed_stops[String.fromCharCode(97 + i)] = 'complete'
+    }
+    return completed_stops
+}
+
+if (DriverLocation) getFinishedLegs()
+
 const getDistance = () => {
     const location = DriverLocation.activeLegID.split('')
     const start = Stops[location[0]]
     const end = Stops[location[1]]
+    const base = Math.abs(start.x - end.x)
+    const height = Math.abs(start.y - end.y)
 
     if (start.x === end.x || start.y === end.y) {
-        const distance = start.x - end.x - (start.y - end.y)
+        const distance = Math.abs(base - height)
         console.log('straight', distance)
     } else {
-        const base = start.x - end.x
-        const height = start.y - end.y
-        const distance = (base * height) / 2
+        const a = Math.pow(base, 2)
+        const b = Math.pow(height, 2)
+        const distance = Math.sqrt(a + b)
         console.log('diagonal', distance)
     }
 }
@@ -59,17 +89,17 @@ const getLocation = () => {
     let y_location;
 
     if (!DriverLocation.x_location && !DriverLocation.y_location) {
-        x_location = Math.floor(start.x + (start.x - end.x) * (progress / 100))
-        y_location = Math.floor(start.y + (start.y - end.y) * (progress / 100))
-        DriverLocation.x_location = x_location
-        DriverLocation.y_location = y_location
+        x_location = start.x + Math.floor((end.x - start.x) * (progress / 100))
+        y_location = start.y + Math.floor((end.y - start.y) * (progress / 100))
+        DriverLocation.x = x_location
+        DriverLocation.y = y_location
     }
     console.log('straight', DriverLocation)
-    return (DriverLocation.x_location, DriverLocation.y_location)
+    return (DriverLocation)
 }
 
 wss.on('connection', (ws) => {
-    console.log('Cline Connected')
+    console.log('Client Connected')
     ws.on('message', data => {
             console.log("Message Received", data);
             const msg = JSON.parse(data);
@@ -77,7 +107,12 @@ wss.on('connection', (ws) => {
 
             switch (msg.type) {
                 case "RequestDriver":
-                    wss.broadcast(JSON.stringify(getLocation()));
+                    payload = {
+                        type: 'IncomingDriver',
+                        data: getLocation()
+                    }
+                    console.log(payload.data)
+                    wss.broadcast(JSON.stringify(payload));
                     break;
                 case "RequestStops":
                     payload = {
@@ -93,6 +128,13 @@ wss.on('connection', (ws) => {
                     }
                     wss.broadcast(JSON.stringify(payload));
                     break;
+                case 'RequestCompletedLegs':
+                    payload = {
+                        type: 'IncomingCompletedLegs',
+                        data: getFinishedLegs()
+                    }
+                    wss.broadcast(JSON.stringify(payload));
+                    break
                 default:
                     throw new Error("Unknown event type " + msg.type);
             }
