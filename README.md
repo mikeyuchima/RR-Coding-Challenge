@@ -9,7 +9,7 @@ npm install
 3. start the WebSocket server
 
 ```
-node start.js
+node server.js
 ```
 
 2. start the react server
