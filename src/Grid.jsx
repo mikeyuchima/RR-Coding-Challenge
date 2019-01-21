@@ -6,7 +6,10 @@ const Grid = props => {
 
   if (stops[x + "_" + y]) {
     icon = stops[x + "_" + y];
-  } else if (driver_location.x === x && driver_location.y === y) {
+  } else if (
+    parseInt(driver_location.x) === x &&
+    parseInt(driver_location.y) === y
+  ) {
     icon = "🚗";
   }
   if (completed_legs[stops[x + "_" + y]])

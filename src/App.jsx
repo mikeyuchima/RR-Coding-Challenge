@@ -30,8 +30,8 @@ class App extends Component {
   };
 
   sendLocation = data => {
-    data.type = "RequestUpdate";
-    this.socket.send(JSON.stringify({ data }));
+    const { x, y, leg } = data;
+    this.socket.send(JSON.stringify({ type: "RequestUpdate", x, y, leg }));
   };
 
   componentDidMount() {
@@ -83,7 +83,7 @@ class App extends Component {
         <h1>Rose Rocket</h1>
         <Row className="show-grid">
           <Col xs={6} md={4}>
-            {/* <Info /> */}
+            <Info driver={this.state.driver} />
           </Col>
           <Col xs={6} md={4}>
             <Grids
