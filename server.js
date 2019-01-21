@@ -2,7 +2,6 @@ import express from 'express';
 let DriverLocation = require('./db/driver.js')
 import Stops from "./db/stops";
 import Legs from './db/legs'
-import Driver from './src/Driver.jsx';
 
 const app = express()
 const WebSocket = require('ws');
@@ -30,17 +29,15 @@ wss.broadcast = (data, ws) => {
 };
 
 const updateLocation = (x_axis, y_axis, leg) => {
-    DriverLocation.x_location = x_axis
-    DriverLocation.y_location = y_axis
-    DriverLocation.activeLegID = leg
-    const distance = getDistance()
+    DriverLocation.x = x_axis
+    DriverLocation.y = y_axis
+    DriverLocation.activeLegID = leg.value
+    const distance = getStopDistance()
     const distance_remaining = getDistancetoStop()
-    DriverLocation.legProgress = distance / distance_remaining
+    DriverLocation.legProgress = (distance - distance_remaining) / distance * 100
 
     return DriverLocation
 }
-
-const updateProgress = () => {}
 
 const autoUpdate = () => {
     const distance = getDistance() * 1000
@@ -89,8 +86,8 @@ const getDistancetoStop = () => {
     const location = DriverLocation.activeLegID.split('')[1]
     const start = DriverLocation
     const end = Stops[location]
-    const base = Math.abs(start.x_location - end.x)
-    const height = Math.abs(start.y_location - end.y)
+    const base = Math.abs(start.x - end.x)
+    const height = Math.abs(start.y - end.y)
     let distance;
 
     if (base === 0 || height === 0) {
@@ -109,12 +106,10 @@ const getLocation = () => {
     const progress = DriverLocation.legProgress
     const start = Stops[location[0]]
     const end = Stops[location[1]]
-    let x_location;
-    let y_location;
 
-    if (!DriverLocation.x_location && !DriverLocation.y_location) {
-        x_location = start.x + Math.floor((end.x - start.x) * (progress / 100))
-        y_location = start.y + Math.floor((end.y - start.y) * (progress / 100))
+    if (!DriverLocation.x && !DriverLocation.y) {
+        const x_location = start.x + Math.floor((end.x - start.x) * (progress / 100))
+        const y_location = start.y + Math.floor((end.y - start.y) * (progress / 100))
         DriverLocation.x = x_location
         DriverLocation.y = y_location
     }
@@ -125,11 +120,10 @@ wss.on('connection', (ws) => {
     console.log('Client Connected')
     ws.on('message', data => {
             console.log("Message Received", data);
-            const data = JSON.parse(data);
+            const pack = JSON.parse(data);
             let payload;
-            console.log(data.type)
 
-            switch (data.type) {
+            switch (pack.type) {
                 case "RequestDriver":
                     payload = {
                         type: 'IncomingDriver',
@@ -163,7 +157,7 @@ wss.on('connection', (ws) => {
                         x,
                         y,
                         leg
-                    } = data
+                    } = pack
                     payload = {
                         type: 'IncomingDriver',
                         data: updateLocation(x, y, leg)
@@ -171,7 +165,7 @@ wss.on('connection', (ws) => {
                     wss.broadcast(JSON.stringify(payload));
                     break;
                 default:
-                    throw new Error("Unknown event type " + data.type);
+                    throw new Error("Unknown event type " + pack.type);
             }
         }),
         // Set up a callback for when a client closes the socket. This usually means they closed their browser.
