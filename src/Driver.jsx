@@ -9,17 +9,17 @@ import {
 import Select from "react-select";
 
 const options = [
-  { value: "AB", label: "AB" },
-  { value: "BC", label: "BC" },
-  { value: "CD", label: "CD" },
-  { value: "DE", label: "DE" },
-  { value: "EF", label: "EF" },
-  { value: "FG", label: "FG" },
-  { value: "GH", label: "GH" },
-  { value: "HI", label: "HI" },
-  { value: "IJ", label: "IJ" },
-  { value: "JK", label: "JK" },
-  { value: "KL", label: "KL" }
+  { value: "AB" },
+  { value: "BC" },
+  { value: "CD" },
+  { value: "DE" },
+  { value: "EF" },
+  { value: "FG" },
+  { value: "GH" },
+  { value: "HI" },
+  { value: "IJ" },
+  { value: "JK" },
+  { value: "KL" }
 ];
 
 class Driver extends Component {
@@ -60,7 +60,10 @@ class Driver extends Component {
   handleSubmit = e => {
     e.preventDefault();
     const payload = this.state;
-    this.props.sendLocation(payload);
+    if (payload.x && payload.y && payload.leg) {
+      this.props.sendLocation(payload);
+      this.setState({ x: "", y: "", leg: "" });
+    } else alert("Invalid Inputs");
   };
 
   render() {

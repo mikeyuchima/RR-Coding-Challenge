@@ -21,10 +21,7 @@ class App extends Component {
     const { stops } = this.state;
     let coord = {};
     for (var stop in stops) {
-      if (coord[stops[stop].x + "_" + stops[stop].y]) {
-        coord[stops[stop].x + "_" + stops[stop].y] =
-          coord[stops[stop].x + "_" + stops[stop].y] + stop;
-      } else coord[stops[stop].x + "_" + stops[stop].y] = stop;
+      coord[stops[stop].x + "_" + stops[stop].y] = stop;
     }
     return coord;
   };
