@@ -80,19 +80,19 @@ class App extends Component {
   render() {
     return (
       <div>
-        <h1>Rose Rocket</h1>
+        <h1 className="title">Rose Rocket</h1>
         <Row className="show-grid">
-          <Col xs={6} md={4}>
+          <Col xs={3} md={2}>
             <Info driver={this.state.driver} />
           </Col>
-          <Col xs={6} md={4}>
+          <Col xs={6} md={8}>
             <Grids
               stops={this.coordinate()}
               driver_location={this.state.driver}
               completed_legs={this.state.completed_legs}
             />
           </Col>
-          <Col xsHidden md={4}>
+          <Col xs={3} md={2}>
             <Driver sendLocation={this.sendLocation} />
           </Col>
         </Row>
