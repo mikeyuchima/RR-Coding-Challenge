@@ -57,9 +57,10 @@ const JSONLegs = [{
     }
 ]
 
-const Legs = JSONLegs.reduce((obj, current) => {
-    obj[current.name] = current
-    return obj
+let result = {};
+JSONLegs.forEach((el) => {
+    result[el.legID] = el;
 })
+let Legs = result
 
-export default Legs;
+module.exports = Legs;

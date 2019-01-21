@@ -1,7 +1,7 @@
-import express from 'express';
+const express = require('express')
 let DriverLocation = require('./db/driver.js')
-import Stops from "./db/stops";
-import Legs from './db/legs'
+const Stops = require("./db/stops")
+const Legs = require('./db/legs')
 
 const app = express()
 const WebSocket = require('ws');
@@ -35,23 +35,22 @@ const updateLocation = (x_axis, y_axis, leg) => {
     const distance = getStopDistance()
     const distance_remaining = getDistancetoStop()
     DriverLocation.legProgress = (distance - distance_remaining) / distance * 100
+    DriverLocation.timeRemaining = getTimetoDestination();
 
     return DriverLocation
 }
 
-const autoUpdate = () => {
-    const distance = getDistance() * 1000
+const getTimetoDestination = () => {
+    const distance = getStopDistance()
     const current_leg = DriverLocation.activeLegID
-    let progress = ((DriverLocation.progress / 100) * distance)
-    let distance_remaining = progress - distance
     const speed = Legs[current_leg].speedLimit
-    const time = distance / speed
-    const distance_per_minute = (speed * 10000) / 60
+    let time = distance / speed
 
-    setInterval(() => {
-        progress = distance_remaining + distance_per_minute
-        percentage = progress / distance
-    }, 60000);
+    var hours = Math.floor(time);
+    var minutes = (time * 60) % 60;
+    time = hours + ":" + minutes;
+
+    return time
 }
 
 const getFinishedLegs = () => {
@@ -97,7 +96,6 @@ const getDistancetoStop = () => {
         const b = Math.pow(height, 2)
         distance = Math.sqrt(a + b)
     }
-
     return distance
 }
 
@@ -112,8 +110,9 @@ const getLocation = () => {
         const y_location = start.y + Math.floor((end.y - start.y) * (progress / 100))
         DriverLocation.x = x_location
         DriverLocation.y = y_location
+        DriverLocation.timeRemaining = getTimetoDestination();
     }
-    return (DriverLocation)
+    return DriverLocation
 }
 
 wss.on('connection', (ws) => {
@@ -163,6 +162,11 @@ wss.on('connection', (ws) => {
                         data: updateLocation(x, y, leg)
                     }
                     wss.broadcast(JSON.stringify(payload));
+                    payload = {
+                        type: 'IncomingCompletedLegs',
+                        data: getFinishedLegs()
+                    }
+                    wss.broadcast(JSON.stringify(payload))
                     break;
                 default:
                     throw new Error("Unknown event type " + pack.type);
@@ -173,7 +177,3 @@ wss.on('connection', (ws) => {
             console.log('Client disconnected')
         });
 });
-
-// app.listen(PORT, () => {
-//     console.log(`Rose Rocket listening on port ${PORT}!`);
-// });

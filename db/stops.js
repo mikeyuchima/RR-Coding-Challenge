@@ -65,4 +65,4 @@ JSONStops.forEach((el) => {
 })
 let Stops = result
 
-export default Stops
+module.exports = Stops;
