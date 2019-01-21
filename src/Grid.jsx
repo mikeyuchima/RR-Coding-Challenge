@@ -2,18 +2,20 @@ import React from "react";
 
 const Grid = props => {
   let icon = "";
-  let { stops, x, y, driver_location } = props;
-  for (var stop in stops) {
-    if (stops[stop].x === x && stops[stop].y === y) {
-      icon = stop;
-      console.log("ICON", icon);
-    } else if (driver_location.x === x && driver_location.y === y) {
-      // icon = <i class="fas fa-shuttle-van" alt="vehicle" />;
-      icon = "*";
-      console.log("CAR", x, y);
-    }
+  let { stops, x, y, driver_location, completed_legs } = props;
+
+  if (stops[x + "_" + y]) {
+    icon = stops[x + "_" + y];
+  } else if (driver_location.x === x && driver_location.y === y) {
+    icon = "🚗";
   }
-  return <div className="box">{icon}</div>;
+  if (completed_legs[stops[x + "_" + y]])
+    return (
+      <div className="box" style={{ backgroundColor: "yellow" }}>
+        {icon}
+      </div>
+    );
+  else return <div className="box">{icon}</div>;
 };
 
 export default Grid;

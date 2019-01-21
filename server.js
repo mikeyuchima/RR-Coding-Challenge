@@ -2,7 +2,7 @@ import express from 'express';
 let DriverLocation = require('./db/driver.js')
 import Stops from "./db/stops";
 import Legs from './db/legs'
-import bodyParser from 'body-parser';
+import Driver from './src/Driver.jsx';
 
 const app = express()
 const WebSocket = require('ws');
@@ -29,10 +29,18 @@ wss.broadcast = (data, ws) => {
     });
 };
 
-const updateLocation = (x_axis, y_axis) => {
+const updateLocation = (x_axis, y_axis, leg) => {
     DriverLocation.x_location = x_axis
     DriverLocation.y_location = y_axis
+    DriverLocation.activeLegID = leg
+    const distance = getDistance()
+    const distance_remaining = getDistancetoStop()
+    DriverLocation.legProgress = distance / distance_remaining
+
+    return DriverLocation
 }
+
+const updateProgress = () => {}
 
 const autoUpdate = () => {
     const distance = getDistance() * 1000
@@ -51,33 +59,49 @@ const autoUpdate = () => {
 
 const getFinishedLegs = () => {
     const last_stop = DriverLocation.activeLegID.split('')[0]
-    const letter_number = last_stop.toLowerCase().charCodeAt(0) - 97
+    const letter_number = last_stop.toUpperCase().charCodeAt(0) - 64
     let completed_stops = {}
-    console.log(letter_number)
     for (let i = 0; i < letter_number; i++) {
-        completed_stops[String.fromCharCode(97 + i)] = 'complete'
+        completed_stops[String.fromCharCode(65 + i)] = 'complete'
     }
     return completed_stops
 }
 
-if (DriverLocation) getFinishedLegs()
-
-const getDistance = () => {
+const getStopDistance = () => {
     const location = DriverLocation.activeLegID.split('')
     const start = Stops[location[0]]
     const end = Stops[location[1]]
     const base = Math.abs(start.x - end.x)
     const height = Math.abs(start.y - end.y)
+    let distance;
 
     if (start.x === end.x || start.y === end.y) {
-        const distance = Math.abs(base - height)
-        console.log('straight', distance)
+        distance = Math.abs(base - height)
     } else {
         const a = Math.pow(base, 2)
         const b = Math.pow(height, 2)
-        const distance = Math.sqrt(a + b)
-        console.log('diagonal', distance)
+        distance = Math.sqrt(a + b)
     }
+    return distance
+}
+
+const getDistancetoStop = () => {
+    const location = DriverLocation.activeLegID.split('')[1]
+    const start = DriverLocation
+    const end = Stops[location]
+    const base = Math.abs(start.x_location - end.x)
+    const height = Math.abs(start.y_location - end.y)
+    let distance;
+
+    if (base === 0 || height === 0) {
+        distance = Math.abs(base - height)
+    } else {
+        const a = Math.pow(base, 2)
+        const b = Math.pow(height, 2)
+        distance = Math.sqrt(a + b)
+    }
+
+    return distance
 }
 
 const getLocation = () => {
@@ -94,7 +118,6 @@ const getLocation = () => {
         DriverLocation.x = x_location
         DriverLocation.y = y_location
     }
-    console.log('straight', DriverLocation)
     return (DriverLocation)
 }
 
@@ -102,16 +125,16 @@ wss.on('connection', (ws) => {
     console.log('Client Connected')
     ws.on('message', data => {
             console.log("Message Received", data);
-            const msg = JSON.parse(data);
+            const data = JSON.parse(data);
             let payload;
+            console.log(data.type)
 
-            switch (msg.type) {
+            switch (data.type) {
                 case "RequestDriver":
                     payload = {
                         type: 'IncomingDriver',
                         data: getLocation()
                     }
-                    console.log(payload.data)
                     wss.broadcast(JSON.stringify(payload));
                     break;
                 case "RequestStops":
@@ -135,8 +158,20 @@ wss.on('connection', (ws) => {
                     }
                     wss.broadcast(JSON.stringify(payload));
                     break
+                case 'RequestUpdate':
+                    const {
+                        x,
+                        y,
+                        leg
+                    } = data
+                    payload = {
+                        type: 'IncomingDriver',
+                        data: updateLocation(x, y, leg)
+                    }
+                    wss.broadcast(JSON.stringify(payload));
+                    break;
                 default:
-                    throw new Error("Unknown event type " + msg.type);
+                    throw new Error("Unknown event type " + data.type);
             }
         }),
         // Set up a callback for when a client closes the socket. This usually means they closed their browser.

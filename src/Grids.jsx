@@ -4,6 +4,7 @@ import Grid from "./Grid.jsx";
 
 class Grids extends Component {
   createTable = () => {
+    console.log(this.props);
     let table = [];
 
     // Outer loop to create parent
@@ -17,6 +18,7 @@ class Grids extends Component {
             y={y}
             stops={this.props.stops}
             driver_location={this.props.driver_location}
+            completed_legs={this.props.completed_legs}
           />
         );
       }

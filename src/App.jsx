@@ -1,6 +1,9 @@
 import React, { Component } from "react";
 import "./App.css";
 import Grids from "./Grids";
+import Info from "./Info";
+import Driver from "./Driver";
+import { Row, Col } from "react-bootstrap";
 
 class App extends Component {
   constructor() {
@@ -14,18 +17,34 @@ class App extends Component {
     };
   }
 
+  coordinate = () => {
+    const { stops } = this.state;
+    let coord = {};
+    for (var stop in stops) {
+      if (coord[stops[stop].x + "_" + stops[stop].y]) {
+        coord[stops[stop].x + "_" + stops[stop].y] =
+          coord[stops[stop].x + "_" + stops[stop].y] + stop;
+      } else coord[stops[stop].x + "_" + stops[stop].y] = stop;
+    }
+    return coord;
+  };
+
+  sendLocation = data => {
+    data.type = "RequestUpdate";
+    this.socket.send(JSON.stringify({ data }));
+  };
+
   componentDidMount() {
-    console.log("componentDidMount <App />");
+    console.log("componentDidMount");
     // Setup the WebSocket client
     this.socket = new WebSocket("ws://localhost:8080/websocket");
 
     // Handle when the socket opens (i.e. is connected to the server)
     this.socket.addEventListener("open", evt => {
       console.log("Connected to websocket server");
-      const request_stops = { type: "RequestStops" };
-      this.socket.send(JSON.stringify(request_stops));
-      const request_driver = { type: "RequestDriver" };
-      this.socket.send(JSON.stringify(request_driver));
+      this.socket.send(JSON.stringify({ type: "RequestStops" }));
+      this.socket.send(JSON.stringify({ type: "RequestDriver" }));
+      this.socket.send(JSON.stringify({ type: "RequestCompletedLegs" }));
     });
 
     // Handle messages using `this.receiveMessage`
@@ -41,7 +60,6 @@ class App extends Component {
           break;
         case "IncomingStops":
           const stops = pkg.data;
-          console.log(pkg.data);
           this.setState({ stops });
           break;
         case "IncomingDriver":
@@ -62,7 +80,22 @@ class App extends Component {
   render() {
     return (
       <div>
-        {<Grids stops={this.state.stops} driver_location={this.state.driver} />}
+        <h1>Rose Rocket</h1>
+        <Row className="show-grid">
+          <Col xs={6} md={4}>
+            {/* <Info /> */}
+          </Col>
+          <Col xs={6} md={4}>
+            <Grids
+              stops={this.coordinate()}
+              driver_location={this.state.driver}
+              completed_legs={this.state.completed_legs}
+            />
+          </Col>
+          <Col xsHidden md={4}>
+            <Driver sendLocation={this.sendLocation} />
+          </Col>
+        </Row>
       </div>
     );
   }
