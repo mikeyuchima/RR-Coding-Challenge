@@ -16,7 +16,7 @@ class App extends Component {
       driver: {}
     };
   }
-
+  // Index coordinates of stops
   coordinate = () => {
     const { stops } = this.state;
     let coord = {};
@@ -25,7 +25,7 @@ class App extends Component {
     }
     return coord;
   };
-
+  // Update driver location
   sendLocation = data => {
     const { x, y, leg } = data;
     this.socket.send(JSON.stringify({ type: "RequestUpdate", x, y, leg }));

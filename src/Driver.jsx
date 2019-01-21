@@ -8,6 +8,7 @@ import {
 } from "react-bootstrap";
 import Select from "react-select";
 
+// Leg options to select
 const options = [
   { value: "AB" },
   { value: "BC" },
@@ -32,31 +33,31 @@ class Driver extends Component {
       leg: ""
     };
   }
-
+  // Validate input
   getValidationState_x() {
     const coord = Math.floor(this.state.x);
     if (coord < 201 && coord > -1) return null;
     else return "error";
   }
-
+  // Validate input
   getValidationState_y() {
     const coord = Math.floor(this.state.y);
     if (coord < 201 && coord > -1) return null;
     else return "error";
   }
-
+  // Insert into state
   handleSelect = leg => {
     this.setState({ leg });
   };
-
+  // Insert into state
   handleChange = e => {
     this.setState({ x: e.target.value });
   };
-
+  // Insert into state
   handleChange2 = e => {
     this.setState({ y: e.target.value });
   };
-
+  // Form Submit
   handleSubmit = e => {
     e.preventDefault();
     const payload = this.state;

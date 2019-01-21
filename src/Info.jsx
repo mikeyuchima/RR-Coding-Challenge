@@ -1,6 +1,7 @@
 import React from "react";
 
 const Info = props => {
+  // Driver data
   const { x, y, legProgress, activeLegID, timeRemaining } = props.driver;
   let message;
   if (legProgress === 100) message = "At Destination";
