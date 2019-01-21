@@ -4,7 +4,6 @@
 
 ```
 npm install
-
 ```
 
 3. start the WebSocket server
