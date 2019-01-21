@@ -7,10 +7,10 @@ class Grids extends Component {
     console.log(this.props);
     let table = [];
 
-    // Outer loop to create parent
+    // Outer loop to create y-axis
     for (let y = 0; y < 201; y++) {
       let children = [];
-      //Inner loop to create children
+      //Inner loop to create x-axis
       for (let x = 0; x < 201; x++) {
         children.push(
           <Grid
@@ -22,7 +22,7 @@ class Grids extends Component {
           />
         );
       }
-      //Create the parent and add the children
+      //Create the grid map
       table.push(
         <section className="row">
           {children}

@@ -19,7 +19,7 @@ const wss = new WebSocket.Server({
     server,
     path: "/websocket"
 });
-
+// Send data to connected clients
 wss.broadcast = (data, ws) => {
     wss.clients.forEach(client => {
         if (client !== ws && client.readyState === WebSocket.OPEN) {
@@ -27,7 +27,7 @@ wss.broadcast = (data, ws) => {
         }
     });
 };
-
+// Update the location of the driver
 const updateLocation = (x_axis, y_axis, leg) => {
     DriverLocation.x = x_axis
     DriverLocation.y = y_axis
@@ -39,7 +39,7 @@ const updateLocation = (x_axis, y_axis, leg) => {
 
     return DriverLocation
 }
-
+// Get the time from current driver location to the next stop
 const getTimetoDestination = () => {
     const distance = getStopDistance()
     const current_leg = DriverLocation.activeLegID
@@ -52,7 +52,7 @@ const getTimetoDestination = () => {
 
     return time
 }
-
+// Indexing list of completed legs
 const getFinishedLegs = () => {
     const last_stop = DriverLocation.activeLegID.split('')[0]
     const letter_number = last_stop.toUpperCase().charCodeAt(0) - 64
@@ -62,7 +62,7 @@ const getFinishedLegs = () => {
     }
     return completed_stops
 }
-
+// Get the distacne between stops
 const getStopDistance = () => {
     const location = DriverLocation.activeLegID.split('')
     const start = Stops[location[0]]
@@ -80,7 +80,7 @@ const getStopDistance = () => {
     }
     return distance
 }
-
+// Get distance from driver to stop
 const getDistancetoStop = () => {
     const location = DriverLocation.activeLegID.split('')[1]
     const start = DriverLocation
@@ -98,7 +98,7 @@ const getDistancetoStop = () => {
     }
     return distance
 }
-
+// Get the location of the driver
 const getLocation = () => {
     const location = DriverLocation.activeLegID.split('')
     const progress = DriverLocation.legProgress
