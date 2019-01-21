@@ -1,5 +1,4 @@
 .box {
-  /* border: 1px solid gray; */
   width: 15px;
   height: 15px;
 }
@@ -10,6 +9,25 @@
 
 .map {
   overflow: scroll;
-  height: 85vh;
+  height: 87vh;
   background: grey;
+}
+
+.info {
+  margin-left: 25px;
+  height: 30vh;
+  box-shadow: 0px 10px 30px grey;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.info-title {
+  text-align: center;
+  padding-top: 10px;
+}
+
+.title {
+  text-align: center;
 }

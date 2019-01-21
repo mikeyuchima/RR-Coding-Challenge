@@ -4,17 +4,13 @@ import { ProgressBar, now, label } from "react-bootstrap";
 const Info = props => {
   const { x, y, legProgress, activeLegID } = props.driver;
   return (
-    <div>
-      <h2>Driver's Location</h2>
-      <ul style={{ listStyleType: "none" }}>
-        <li>X: {x}</li>
-        <li>Y: {y}</li>
-        <li>Current Leg: {activeLegID}</li>
-        <li>Progress Bar:</li>
-        <li>
-          <progress value={legProgress} max="100" />
-        </li>
-      </ul>
+    <div className="info">
+      <h4 className="info-title">Driver's Location</h4>
+      <p>X: {x}</p>
+      <p>Y: {y}</p>
+      <p>Current Leg: {activeLegID}</p>
+      <p>Progress Bar:</p>
+      <progress value={legProgress} max="100" />
     </div>
   );
 };
