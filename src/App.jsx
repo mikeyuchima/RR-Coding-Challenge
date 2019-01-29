@@ -27,7 +27,8 @@ class App extends Component {
   };
   // Update driver location
   sendLocation = data => {
-    const { x, y, leg } = data;
+    let { x, y, leg } = data;
+    leg = leg.value;
     this.socket.send(JSON.stringify({ type: "RequestUpdate", x, y, leg }));
   };
 

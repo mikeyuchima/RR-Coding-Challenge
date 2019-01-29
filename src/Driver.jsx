@@ -10,17 +10,17 @@ import Select from "react-select";
 
 // Leg options to select
 const options = [
-  "AB",
-  "BC",
-  "CD",
-  "DE",
-  "EF",
-  "FG",
-  "GH",
-  "HI",
-  "IJ",
-  "JK",
-  "KL"
+  { value: "AB", label: "AB" },
+  { value: "BC", label: "BC" },
+  { value: "CD", label: "CD" },
+  { value: "DE", label: "DE" },
+  { value: "EF", label: "EF" },
+  { value: "FG", label: "FG" },
+  { value: "GH", label: "GH" },
+  { value: "HI", label: "HI" },
+  { value: "IJ", label: "IJ" },
+  { value: "JK", label: "JK" },
+  { value: "KL", label: "KL" }
 ];
 
 class Driver extends Component {
