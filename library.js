@@ -1,6 +1,7 @@
-let DriverLocation = require('./db/driver.js')
+const Driver = require('./db/driver.js')
 const Stops = require("./db/stops")
 const Legs = require('./db/legs')
+let DriverLocation = Driver
 
 const method = {
     // Send list of legs
@@ -13,11 +14,11 @@ const method = {
     },
     // Update location of driver
     updateLocation: (x_axis, y_axis, leg) => {
-        DriverLocation.x = x_axis
-        DriverLocation.y = y_axis
-        DriverLocation.activeLegID = leg.value
         const distance = method.getStopDistance()
         const distance_remaining = method.getDistancetoStop()
+        DriverLocation.x = x_axis
+        DriverLocation.y = y_axis
+        DriverLocation.activeLegID = leg
         DriverLocation.legProgress = (distance - distance_remaining) / distance * 100
         DriverLocation.timeRemaining = method.getTimetoDestination();
 
@@ -30,9 +31,7 @@ const method = {
         const speed = Legs[current_leg].speedLimit
         let time = distance / speed
 
-        var hours = Math.floor(time);
-        var minutes = (time * 60) % 60;
-        time = hours + ":" + minutes;
+        time = Math.floor(time * 60)
 
         return time
     },
@@ -66,6 +65,7 @@ const method = {
     },
     // Get distance from driver to stop
     getDistancetoStop: () => {
+        if (!DriverLocation.x && !DriverLocation.y) method.getLocation()
         const location = DriverLocation.activeLegID.split('')[1]
         const start = DriverLocation
         const end = Stops[location]
