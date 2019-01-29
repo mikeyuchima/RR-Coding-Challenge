@@ -12,7 +12,7 @@ const Info = props => {
         <p>X: {x}</p>
         <p>Y: {y}</p>
         <p>Current Leg: {activeLegID}</p>
-        <p>Est to Destination: {timeRemaining}</p>
+        <p>Time to Destination: {timeRemaining}m</p>
         <p>Progress Bar:</p>
         <progress value={legProgress} max="100" />
         {message}
