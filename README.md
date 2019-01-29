@@ -1,5 +1,9 @@
 ## Getting Started
+0. Clone repo into your local directory
 
+```
+git clone git@github.com:mikeyuchima/RR-Coding-Challenge.git
+```
 1. install all the npm packages
 
 ```
