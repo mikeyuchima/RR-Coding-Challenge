@@ -14,11 +14,11 @@ const method = {
     },
     // Update location of driver
     updateLocation: (x_axis, y_axis, leg) => {
-        const distance = method.getStopDistance()
-        const distance_remaining = method.getDistancetoStop()
         DriverLocation.x = x_axis
         DriverLocation.y = y_axis
         DriverLocation.activeLegID = leg
+        const distance = method.getStopDistance()
+        const distance_remaining = method.getDistancetoStop()
         DriverLocation.legProgress = (distance - distance_remaining) / distance * 100
         DriverLocation.timeRemaining = method.getTimetoDestination();
 
@@ -26,11 +26,10 @@ const method = {
     },
     // Get the time from current driver location to the next stop
     getTimetoDestination: () => {
-        const distance = method.getStopDistance()
+        const distance = method.getDistancetoStop()
         const current_leg = DriverLocation.activeLegID
         const speed = Legs[current_leg].speedLimit
         let time = distance / speed
-
         time = Math.floor(time * 60)
 
         return time
@@ -65,7 +64,7 @@ const method = {
     },
     // Get distance from driver to stop
     getDistancetoStop: () => {
-        if (!DriverLocation.x && !DriverLocation.y) method.getLocation()
+        // if (!DriverLocation.x && !DriverLocation.y) method.getLocation()
         const location = DriverLocation.activeLegID.split('')[1]
         const start = DriverLocation
         const end = Stops[location]
